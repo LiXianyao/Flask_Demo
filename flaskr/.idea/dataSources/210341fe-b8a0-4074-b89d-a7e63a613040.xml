@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="weibotest1@localhost">
+  <database-model serializer="dbm" rdbms="MYSQL" format-version="4.1">
+    <root id="1"/>
+    <schema id="2" parent="1" name="weibotest1">
+      <Current>1</Current>
+      <Visible>1</Visible>
+    </schema>
+    <schema id="3" parent="1" name="crawler"/>
+    <schema id="4" parent="1" name="information_schema"/>
+    <schema id="5" parent="1" name="mysql"/>
+    <schema id="6" parent="1" name="performance_schema"/>
+    <schema id="7" parent="1" name="sys"/>
+    <table id="8" parent="2" name="comment"/>
+    <table id="9" parent="2" name="entries"/>
+    <table id="10" parent="2" name="forward"/>
+    <table id="11" parent="2" name="topic_id"/>
+    <table id="12" parent="2" name="uncrawled_uid"/>
+    <table id="13" parent="2" name="weibo"/>
+    <column id="14" parent="8" name="cid">
+      <Position>1</Position>
+      <Comment>评论微博id</Comment>
+      <DataType>varchar(30)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="15" parent="8" name="mid">
+      <Position>2</Position>
+      <Comment>所评论的微博id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="16" parent="8" name="uid">
+      <Position>3</Position>
+      <Comment>用户id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="17" parent="8" name="cmtContent">
+      <Position>4</Position>
+      <DataType>mediumtext|0</DataType>
+    </column>
+    <column id="18" parent="8" name="likeNum">
+      <Position>5</Position>
+      <Comment>赞量</Comment>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <column id="19" parent="8" name="time">
+      <Position>6</Position>
+      <Comment>评论时间</Comment>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <column id="20" parent="8" name="topic">
+      <Position>7</Position>
+      <Comment>所属话题</Comment>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <key id="21" parent="8" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>cid</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="22" parent="9" name="id">
+      <Position>1</Position>
+      <DataType>int(11)|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="23" parent="9" name="title">
+      <Position>2</Position>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <column id="24" parent="9" name="text">
+      <Position>3</Position>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <key id="25" parent="9" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="26" parent="10" name="mid">
+      <Position>1</Position>
+      <Comment>微博id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="27" parent="10" name="fid">
+      <Position>2</Position>
+      <Comment>转发微博id</Comment>
+      <DataType>varchar(30)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="28" parent="10" name="uid">
+      <Position>3</Position>
+      <Comment>用户id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="29" parent="10" name="fwdContent">
+      <Position>4</Position>
+      <Comment>转发内容</Comment>
+      <DataType>varchar(200)|0</DataType>
+    </column>
+    <column id="30" parent="10" name="likeNUm">
+      <Position>5</Position>
+      <Comment>点赞量</Comment>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="31" parent="10" name="time">
+      <Position>6</Position>
+      <Comment>转发时间</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="32" parent="10" name="topic">
+      <Position>7</Position>
+      <Comment>所属话题</Comment>
+      <DataType>varchar(50)|0</DataType>
+    </column>
+    <key id="33" parent="10" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>fid</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="34" parent="11" name="topic">
+      <Position>1</Position>
+      <DataType>varchar(255)|0</DataType>
+    </column>
+    <column id="35" parent="11" name="time">
+      <Position>2</Position>
+      <Comment>话题插入时间</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="36" parent="11" name="id">
+      <Position>3</Position>
+      <DataType>int(11)|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="37" parent="11" name="introduction">
+      <Position>4</Position>
+      <Comment>话题导语</Comment>
+      <DataType>varchar(1000)|0</DataType>
+    </column>
+    <key id="38" parent="11" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="39" parent="12" name="uncrawled_uid">
+      <Position>1</Position>
+      <DataType>varchar(255)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <key id="40" parent="12" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>uncrawled_uid</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="41" parent="13" name="mid">
+      <Position>1</Position>
+      <Comment>微博id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="42" parent="13" name="uid">
+      <Position>2</Position>
+      <Comment>用户id</Comment>
+      <DataType>varchar(30)|0</DataType>
+    </column>
+    <column id="43" parent="13" name="content">
+      <Position>3</Position>
+      <DataType>longtext|0</DataType>
+    </column>
+    <column id="44" parent="13" name="likeNum">
+      <Position>4</Position>
+      <Comment>点赞量</Comment>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="45" parent="13" name="forwardNum">
+      <Position>5</Position>
+      <Comment>转发量</Comment>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="46" parent="13" name="commentNum">
+      <Position>6</Position>
+      <Comment>评论量</Comment>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="47" parent="13" name="time">
+      <Position>7</Position>
+      <Comment>发表时间</Comment>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="48" parent="13" name="source">
+      <Position>8</Position>
+      <Comment>微博来源</Comment>
+      <DataType>varchar(50)|0</DataType>
+    </column>
+    <column id="49" parent="13" name="topic">
+      <Position>9</Position>
+      <Comment>所属话题</Comment>
+      <DataType>varchar(50)|0</DataType>
+    </column>
+    <column id="50" parent="13" name="id">
+      <Position>10</Position>
+      <DataType>int(20)|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <key id="51" parent="13" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+  </database-model>
+</dataSource>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>动画作业</title>
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <script language="JavaScript" src="static/js/jquery-3.2.0.min.js"></script>
+    <script language="JavaScript" src="static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!--音频实验标签页，展示实验内容，成品和简介-->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">实验三  动画制作</h1>
+            </div>
+            <div class="panel-body">
+                <p class="panel-title">要求：根据实验1中得到的歌曲或配乐朗诵，做一段Flash（不少于1分半钟），并合成为一段动画MV。</p>
+            </div>
+        </div>
+	</div>
+
+	<div class="row">
+        <div class="col-sm-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="col-sm-4"><h2 class="panel-title">实验成品</h2></div>
+                    <button type="button" class="btn btn-primary col-sm-offset-6 " id="download">下载</button>
+                </div>
+                <div class="panel-body">
+                    <h5 id="videoName"></h5>
+                    <video id="videoEmbed" src="" controls="controls" width="100%">您的浏览器不支持 video 标签。</video>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-4 ">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">作品列表</h3>
+                </div>
+
+                <div class="panel-body">
+                    <div class="list-group" id="videoList">
+                            <a href="#" class="list-group-item active" src="" ></a>
+                            <a href="#" class="list-group-item"  src="">可上传</a>
+                    </div>
+
+                    <form>
+                        <div class="from-group">
+                            <label for="videoUploadFile">视频上传</label>
+                            <input type="file" id="videoUploadFile"  accept=".swf">
+                            <p></p>
+                        </div>
+                        <button id="upload" type="button" class="btn btn-primary col-sm-offset-9">上传</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+</body>
+
+<script>
+    var homeworkName = "多媒体实验3.mp4";
+
+    $(document).ready(function(){
+        //首先默认1是作业音乐
+        var myhomeWork = $("#videoList a.active");
+        myhomeWork.attr("src","./static/video/" + homeworkName);
+        myhomeWork.text(homeworkName);
+        $("#videoName").text(myhomeWork.text());
+
+        $("#videoEmbed").attr("src","./static/video/" + homeworkName);
+        $("#videoObject").attr("value","./static/video/" + homeworkName);
+
+        //ajax请求已上传音乐列表，（json)
+        $.ajax({
+            url:"http://127.0.0.1:5000/List/",
+            type:'GET',
+            data: 'type=video',
+            datatype :'json', //
+            success: function(data){
+                obj = jQuery.parseJSON(data); //字符串转为json格式
+                if(obj.successed == false)
+                    alert(obj.message);
+                else{
+                    //收到列表消息，进行列表更新
+                    listArr = obj.List;
+                    for(var i = 0; i< listArr.length ; i++){
+
+                        if($.trim(listArr[i]) == $.trim(homeworkName))
+                            continue;
+                        var newvideo = document.createElement('a');
+                        newvideo.href = "#";
+                        newvideo.className = "list-group-item";
+                        newvideo.setAttribute("src", "./static/video/" + listArr[i]);
+                        newvideo.innerText = listArr[i];
+                        //alert(listArr[i]);
+                        $("#videoList").prepend(newvideo);
+                    }
+
+                    //因为会动态改变列表，所以加在这里
+                    $("#videoList a").click(function () {
+                        //更换动画
+                        $("#videoEmbed").attr("src",$(this).attr("src"));
+                        $("#videoObject").attr("value",$(this).attr("src"));
+                        $("#videoName").text($(this).text());
+                        $("#videoList a.active").removeClass("active");
+                        $(this).addClass("active");
+
+                    });
+                }
+            }
+        })
+
+        //因为会动态改变列表，所以加在这里
+        $("#videoList a").click(function () {
+            //更换动画
+            $("#videoEmbed").attr("src",$(this).attr("src"));
+            $("#videoObject").attr("value",$(this).attr("src"));
+            $("#videoName").text($(this).text());
+            $("#videoList a.active").removeClass("active");
+            $(this).addClass("active");
+
+        });
+    });
+
+    $("#download").click(function(){
+       var link = document.createElement('a');
+       link.href = $("#videoEmbed").attr("src");
+        alert("即将下载文件" + $("#videoList a.active").text() + "\n来源：" + link.href);
+        if(link.href.length == 0){
+            alert("未选择可下载的文件");
+            return;
+        }
+        link.download = $("#videoList a.active").text();
+        document.body.appendChild(link);
+        link.click();
+    });
+
+    $("#upload").click(function(){
+       var fileroute = $("#videoUploadFile").val().split("\\");
+       var filename = fileroute[fileroute.length - 1];
+
+        if(filename.length == 0){
+            alert("未选择可上传的文件");
+            return;
+        }
+        var fileData = new FormData();
+        fileData.append("fileroute",$("#videoUploadFile").val());
+        fileData.append("type","video");
+        fileData.append("file",$("#videoUploadFile").prop("files")[0]);
+        fileData.append("filename",filename);
+        alert("异步请求已发送，如果长时间没有得到响应，请检查服务器是否正常开启");
+        $.ajax({
+            url:"http://127.0.0.1:5000/upload/",
+            type:'POST',
+            /*data: 'type=video'+
+                    '&&filename=' + $("#videoUploadFile").val()+*/
+
+            data :fileData, //
+            processData : false,
+            contentType : false,
+            success: function(data){
+                obj = jQuery.parseJSON(data); //字符串转为json格式
+                if(obj.successed == false)
+                    alert("upload Failed, reason:" + obj.message);
+                else{
+                    //上传成功
+
+                    var newvideo = document.createElement('a');
+                    newvideo.href = "#";
+                    newvideo.className = "list-group-item";
+                    newvideo.setAttribute("src", "./static/video/" + filename);
+                    newvideo.innerText = filename;
+                    $("#videoList").prepend(newvideo);
+                    $("#videoList a").click(function () {
+                        //更换动画
+                        $("#videoEmbed").attr("src",$(this).attr("src"));
+                        $("#videoObject").attr("value",$(this).attr("src"));
+                        $("#videoName").text($(this).text());
+                        $("#videoList a.active").removeClass("active");
+                        $(this).addClass("active");
+
+                    });
+                    alert("upload success");
+                }
+            }
+        })
+    });
+
+</script>
+</html>
