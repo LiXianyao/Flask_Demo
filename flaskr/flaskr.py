@@ -16,7 +16,7 @@ def welcome():
     print('in welcome')
     return render_template("HomePage.html")
 
-@app.route('/List/',methods=['GET'])
+@app.route('/List',methods=['GET'])
 def get_list():
     print(request.args)
     getType = request.args['type']
@@ -26,7 +26,7 @@ def get_list():
     resp = json.dumps(resp)
     return resp
 
-@app.route('/upload/',methods=['GET','POST'])
+@app.route('/upload',methods=['GET','POST'])
 def upload():
 
     resp = {"successed": True, "List": []}
@@ -37,8 +37,8 @@ def upload():
             print(request.form)
             print(request.files["file"])
             f = request.files["file"]
-            upType = request.form['type'].encode("gbk")  ###原文都是Unicode,在操作文件时会报错
-            filename = request.form["filename"]
+            upType = request.form['type']  ###原文都是Unicode,在操作文件时会报错
+            filename = f.filename.encode('unicode_escape').decode('ascii')
         except:
             failed_Res = traceback.format_exc()
             message = "表单数据解析异常" + failed_Res
@@ -48,14 +48,14 @@ def upload():
             return resp
 
         #检查有没有重名
-        pdf_filename = filename.encode("gbk")
-        store_path = "static/" + upType + "/" + pdf_filename
+        pdf_filename = filename
+        store_path = os.path.join("static", upType, pdf_filename)
         txt_filename = filename.replace(".pdf", ".txt")
         try:
             if not os.path.exists(store_path):
-                f.save("static/" + upType + "/" + pdf_filename)
+                f.save(store_path)
                 name_file_dict["txt" if upType == "pdf" else upType][txt_filename] = True
-            with open("static/" + upType + "/" + txt_filename, "w") as res_file:
+            with open("static/" + upType + "/" + txt_filename, "w", encoding="utf-8") as res_file:
                 res_file.writelines(["--------- INFO: 解析请求提交中，长时间无变化请检查后台日志..."])
             threading.Thread(target=runthread, args=([pdf_filename])).start()
         except:
@@ -74,8 +74,6 @@ def txtPage():
 
 def runthread(pdfName):
     '''
-    #fix_con.delete(taskid+"::result") #运行之前先清空上一次的结果
-    #fix_con.delete(taskid+"::classification") #运行之前先清空上一次的结果
     '''
     try:
         os.system("(python -u pdfToTxt.py -f {}) > {}.out".format(pdfName, pdfName))
@@ -86,7 +84,7 @@ def get_name_file(type, name_dict):
     directory = os.path.join("static", type)
     hasPrefix = lambda x: x.find("." + type) != -1
     target = []  # 所有作业目标，是（目录，json文件名二元组）
-    print(u"--------- INFO:程序将遍历目录:{}，查找类型为{}的媒体".format(directory, type))
+    print(u"--------- INFO:程序将遍历目录:{}，查找类型为{}的文件".format(directory, type))
     for dir, subdir, files in os.walk(directory):
         withPreifx = set(list(filter(hasPrefix, files)))
         for fileName in withPreifx:

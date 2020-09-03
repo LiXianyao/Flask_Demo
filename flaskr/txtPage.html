@@ -51,7 +51,7 @@
 
                 <div class="panel-body">
                     <div class="list-group" id="txtList">
-                            <a href="#" class="list-group-item"  src="">可上传</a>
+                            <span href="" class="list-group-item"  src="">可上传</span>
                     </div>
 
                     <form>
@@ -74,7 +74,7 @@
     $(document).ready(function(){
         //ajax请求已上传文件结果列表，（json)
         $.ajax({
-            url:"http://127.0.0.1:5000/List/",
+            url:"List",
             type:'GET',
             data: 'type=txt',
             datatype :'json', //
@@ -107,7 +107,7 @@
                     });
                 }
             }
-        })
+        });
 
         //因为会动态改变列表，所以加在这里
         $("#txtList a").click(function () {
@@ -146,9 +146,8 @@
         fileData.append("type","pdf");
         fileData.append("file",$("#txtUploadFile").prop("files")[0]);
         fileData.append("filename",filename);
-        alert("文件已上传，需要几分钟的处理时间，请耐心等待");
         $.ajax({
-            url:"http://127.0.0.1:5000/upload/",
+            url:"upload",
             type:'POST',
             /*data: 'type=txt'+
                     '&&filename=' + $("#txtUploadFile").val()+*/
@@ -162,24 +161,14 @@
                     alert("upload Failed, reason:" + obj.message);
                 else{
                     //上传成功
-
-                    var newTxt = document.createElement('a');
-                    newTxt.href = "#";
-                    newTxt.className = "list-group-item";
-                    newTxt.setAttribute("src", "./static/txt/" + filename);
-                    newTxt.innerText = filename;
-                    $("#txtList").prepend(newTxt);
-                    $("#txtList a").click(function () {
-                        //更换歌曲
-                        $("#txtProduction").attr("src",$(this).attr("src"));
-                        $("#txtName").text($(this).text());
-                        $("#txtList a.active").removeClass("active");
-                        $(this).addClass("active");
-
-                    });
-                    alert("upload success");
+                    alert("文件已上传，需要几分钟的处理时间，请耐心等待");
+                    $(document).reload();
                 }
+            },
+            error: function () {
+                alert("上传失败！");
             }
+
         })
     });
 

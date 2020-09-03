@@ -394,5 +394,6 @@ if __name__=="__main__":
     task = Pdf2TxtManager(type="test")
     try:
         _, result_file_name, result_dict, _, common_head = task.changePdfToTxt(fileName=pdfName, dir=dir, page_range=range(50), resDir="./static/txt/")
-    with open("static/txt/{}.txt".format(pdfName.replace(".pdf", "")), "a") as res_file:
-        res_file.writelines(["--------- ERRO: 解析期间发生意外，"])
+    except:
+        with open("static/txt/{}.txt".format(pdfName.replace(".pdf", "")), "a") as res_file:
+            res_file.writelines(["--------- ERRO: 解析期间发生意外，"])
