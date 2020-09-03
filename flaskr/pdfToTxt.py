@@ -9,6 +9,7 @@ import os
 #from consoleLogger import logger
 import datetime
 from pdfTablesExtractor2 import PdfTablesExtractor
+import traceback
 
 result = []
 class Pdf2TxtManager:
@@ -103,7 +104,8 @@ class Pdf2TxtManager:
             self.pdftableExtractor.checkAndWaitThreadEnd()   # 等待表格线程回收
             #logger.error(u"文件{}解析失败！无法读取内容，跳过...".format(fileName))
             #logger.error(u"失败原因：{}".format(traceback.format_exc()))
-            res_file.write(u"--------- PDF-Transfer ERROR：文件{}解析失败！无法读取内容，跳过...\n".format(fileName))
+            res_file.write(u"--------- PDF-Transfer ERROR：文件{}解析失败！无法读取内容，跳过...\n{}".format(
+                fileName, traceback.format_exc()))
             pageNum = 0
         if not pageNum:
             return False, [], {}, {}, ""
@@ -400,5 +402,8 @@ if __name__=="__main__":
         if not success:
             res_file.writelines(["--------- ERRO: 不可解的文件，解析失败！"])
     except:
-        res_file.writelines(["--------- ERRO: 解析期间发生意外，"])
+        res_file.writelines(["--------- ERRO: 解析期间发生意外，{}".format(traceback.format_exc())])
     res_file.close()
+
+    rm_pattern = os.path.join(dir, pdfName.replace(".pdf", "")) + "*"
+    os.system("rm {}".format(rm_pattern))

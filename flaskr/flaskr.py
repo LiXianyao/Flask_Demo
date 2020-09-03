@@ -4,6 +4,7 @@ import json
 import traceback
 import threading
 import os
+from pypinyin import pinyin
 app=Flask(__name__, template_folder="")
 app.config.from_object('config')
 
@@ -38,7 +39,7 @@ def upload():
             print(request.files["file"])
             f = request.files["file"]
             upType = request.form['type']  ###原文都是Unicode,在操作文件时会报错
-            filename = f.filename.replace(" ", "").encode('unicode_escape').decode('ascii').replace("\\", "")
+            filename = "-".join(["".join(unit) for unit in pinyin(f.filename.replace(" ", ""))])
         except:
             failed_Res = traceback.format_exc()
             message = "表单数据解析异常" + failed_Res
