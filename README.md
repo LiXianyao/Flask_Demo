@@ -25,3 +25,6 @@
 |musicPage.html
 |videoPage.html
 
+  # 修改源码 table.py 中 268行： x0, top, x1, bottom = bbox -》 top, x0, bottom, x1 = bbox
+
+ # rename its dir from pdfminer/ -> pdfminer3k/
