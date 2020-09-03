@@ -38,7 +38,7 @@ def upload():
             print(request.files["file"])
             f = request.files["file"]
             upType = request.form['type']  ###原文都是Unicode,在操作文件时会报错
-            filename = f.filename.replace(" ", "").encode('unicode_escape').decode('ascii')
+            filename = f.filename.replace(" ", "").encode('unicode_escape').decode('ascii').replace("\\", "")
         except:
             failed_Res = traceback.format_exc()
             message = "表单数据解析异常" + failed_Res
@@ -54,7 +54,7 @@ def upload():
         try:
             if not os.path.exists(store_path):
                 f.save(store_path)
-                name_file_dict["txt" if upType == "pdf" else upType][txt_filename] = True
+                name_file_dict["txt"][txt_filename] = True
             with open("static/txt/" + txt_filename, "a", encoding="utf-8") as res_file:
                 res_file.writelines(["--------- INFO: 解析请求提交中，长时间无变化请检查后台日志...\n"])
             threading.Thread(target=runthread, args=([pdf_filename])).start()
@@ -75,7 +75,8 @@ def txtPage():
 def runthread(pdfName):
     try:
         print(u"--------- Info: 开始解析文件{}".format(pdfName))
-        os.system("(python -u pdfToTxt.py -f {}) > {}.out".format(pdfName, pdfName))
+        debug_route = os.path.join("static", "debug", pdfName + ".out")
+        os.system("(python -u pdfToTxt.py -f {}) > {}".format(pdfName, debug_route))
     except:
         print(u"--------- ERROR: 解析程序执行失败")
 

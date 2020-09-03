@@ -35,7 +35,7 @@ class Pdf2TxtManager:
     def decrypt_pdf_file(self, fileName, dir):
         formFileName = lambda name: os.path.join(dir, name)
         #logger.info(u"尝试解析文件{}... ...".format(fileName))
-        res_file.write(u"--------- PDF-Transfer INFO:尝试解析文件{}... ...".format(fileName))
+        res_file.write(u"--------- PDF-Transfer INFO:尝试解析文件{}... ...\n".format(fileName))
         # 打开指定的pdf，若是加密（密码为空），尝试解密后再打开
         newFileName = formFileName(fileName.replace(".pdf", "_dec.pdf"))  # 直接尝试对pdf进行解码操作
         os.system('qpdf --password="" --decrypt %s %s' % (formFileName(fileName), newFileName))
@@ -46,15 +46,15 @@ class Pdf2TxtManager:
         except:
             if not os.path.exists(newFileName):
                 #logger.error(u"指示的文件%s不存在，请检查" % (formFileName(fileName)))
-                res_file.write(u"--------- PDF-Transfer ERROR：指示的文件%s不存在，请检查" % (formFileName(fileName)))
+                res_file.write(u"--------- PDF-Transfer ERROR：指示的文件%s不存在，请检查\n" % (formFileName(fileName)))
             else:
                 #logger.error(u"有非空密码加密的pdf文件，不可解，转化失败，文件名：{}".format(newFileName))
-                res_file.write(u"--------- PDF-Transfer ERROR：有非空密码加密的pdf文件，不可解，转化失败，文件名：{}".format(newFileName))
+                res_file.write(u"--------- PDF-Transfer ERROR：有非空密码加密的pdf文件，不可解，转化失败，文件名：{}\n".format(newFileName))
             return False
 
         self.doc.initialize()
         #logger.info(u"文件{}解析成功！开始读取数据......".format(fileName))
-        res_file.write(u"--------- PDF-Transfer INFO：文件{}解析成功！尝试获取文件资源......".format(fileName))
+        res_file.write(u"--------- PDF-Transfer INFO：文件{}解析成功！尝试获取文件资源......\n".format(fileName))
         # 逐页读取pdf的内容，解析每一页的layout，对段落进行还原，将跨页的段落进行拼接
         if not self.doc.is_extractable:  # 检测文档是否提供txt转换
             raise PDFTextExtractionNotAllowed  # 使用raise显示地引发异常，后续不再执行
@@ -72,15 +72,16 @@ class Pdf2TxtManager:
                 end_time_s = datetime.datetime.now()
                 cost_time_s = (end_time_s - self.start_time_s).seconds + 1.
                 if (self.page_num / cost_time_s) < 1.:
-                    res_file.write(u"--------- PDF-Transfer ERROR：文件资源获取异常，单页资源获取时间 > 1s，平均耗时{}页/秒".format(
+                    res_file.write(u"--------- PDF-Transfer ERROR：文件资源获取异常，单页资源获取时间 > 1s，平均耗时{}页/秒，文件不可解\n".format(
                         self.page_num / cost_time_s))
                     return False
-                res_file.write(u"--------- PDF-Transfer INFO：文件资源获取完毕，平均耗时{}页/秒".format(
+                res_file.write(u"--------- PDF-Transfer INFO：文件资源获取完毕，平均耗时{}页/秒\n".format(
                     self.page_num / cost_time_s))
             except:
                 #logger.error(u"文件资源获取失败，不可解，转化失败，文件名：{},错误：{}".format(newFileName, traceback.format_exc()))
-                res_file.write(u"--------- PDF-Transfer ERROR：文件资源获取失败，不可解读")
+                res_file.write(u"--------- PDF-Transfer ERROR：文件资源获取失败，不可解读\n")
                 return False
+            res_file.flush()
         return True
 
     u"""
@@ -102,7 +103,7 @@ class Pdf2TxtManager:
             self.pdftableExtractor.checkAndWaitThreadEnd()   # 等待表格线程回收
             #logger.error(u"文件{}解析失败！无法读取内容，跳过...".format(fileName))
             #logger.error(u"失败原因：{}".format(traceback.format_exc()))
-            res_file.write(u"--------- PDF-Transfer ERROR：文件{}解析失败！无法读取内容，跳过...".format(fileName))
+            res_file.write(u"--------- PDF-Transfer ERROR：文件{}解析失败！无法读取内容，跳过...\n".format(fileName))
             pageNum = 0
         if not pageNum:
             return False, [], {}, {}, ""
@@ -131,6 +132,7 @@ class Pdf2TxtManager:
                     for sen in result_dict[str(pageNo + 1)]:
                         res_file.write(str(sen["origin"]) + '\n')
                     res_file.write(">>>>>>>>>>>>>>>>>>>>>>>第 %d 页结束>>>>>>>>>>>>>>>>>>>>>>>\n" % (pageNo + 1))
+                    res_file.flush()
 
         return True, result_file_name, result_dict, self.pdftableExtractor.page_tables, common_head
 
@@ -228,9 +230,10 @@ class Pdf2TxtManager:
             # #logger.info(layout_cnt, layout_max)
             # #logger.info("page %d finish" % (pagecnt + 1))
             pagecnt += 1
-            if pagecnt % 500 == 0:
+            if pagecnt % 1 == 0:
                 #logger.info(u"已扫描读取%d页数据 " % (pagecnt))
-                res_file.write(u"--------- PDF-Transfer INFO：已扫描读取%d页数据 " % (pagecnt))
+                res_file.write(u"--------- PDF-Transfer INFO：已扫描读取%d页数据 \n" % (pagecnt))
+                res_file.flush()
                 #break
             #if pagecnt == 20:
             #    break
@@ -291,7 +294,7 @@ class Pdf2TxtManager:
             try:
                 pages_context[self.lastPage(pages_context, pagecnt)][-1] += text
             except:
-                res_file.write("--------- PDF-Transfer ERROR：error occur! page={}, text={}".format(pagecnt, text))
+                res_file.write("--------- PDF-Transfer ERROR：error occur! page={}, text={}\n".format(pagecnt, text))
                 exit(0)
             last_page_endl = endl
         return last_page_endl
@@ -306,7 +309,7 @@ class Pdf2TxtManager:
                 return pagecnt
         for i in range(len(pages_context)):
             #logger.info
-            res_file.write("Page %d has rows %d" % (i, len(pages_context[i])))
+            res_file.write("Page %d has rows %d\n" % (i, len(pages_context[i])))
 
     u"""
     判断是否为汉字字符串
@@ -393,7 +396,9 @@ if __name__=="__main__":
     task = Pdf2TxtManager(type="test")
     res_file = open("static/txt/{}.txt".format(pdfName.replace(".pdf", "")), "a", encoding="utf-8")
     try:
-        _, result_file_name, result_dict, _, common_head = task.changePdfToTxt(fileName=pdfName, dir=dir, page_range=range(50), resDir="./static/txt/")
+        success, result_file_name, result_dict, _, common_head = task.changePdfToTxt(fileName=pdfName, dir=dir, page_range=range(50), resDir="./static/txt/")
+        if not success:
+            res_file.writelines(["--------- ERRO: 不可解的文件，解析失败！"])
     except:
         res_file.writelines(["--------- ERRO: 解析期间发生意外，"])
     res_file.close()

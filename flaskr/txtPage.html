@@ -56,7 +56,7 @@
 
                     <form>
                         <div class="from-group">
-                            <label for="txtUploadFile">PDF文件上传</label>
+                            <label for="txtUploadFile">PDF文件上传(中文文件名将被转码)</label>
                             <input type="file" id="txtUploadFile"  accept="application/pdf">
                             <p></p>
                         </div>
@@ -98,8 +98,9 @@
                     //因为会动态改变列表，所以加在这里
                     $("#txtList a").click(function () {
                         //更换歌曲
-                        $("#txtProduction").attr("src", $(this).attr("src"));
-                        $("#txtProduction").load($(this).attr("src"));
+                        var fileUrl = $(this).attr("src") + "?time=" + new Date().getMilliseconds();
+                        $("#txtProduction").attr("src", fileUrl);
+                        $("#txtProduction").load(fileUrl);
                         $("#txtName").text($(this).text());
                         $("#txtList a.active").removeClass("active");
                         $(this).addClass("active");
@@ -162,7 +163,7 @@
                 else{
                     //上传成功
                     alert("文件已上传，需要几分钟的处理时间，请耐心等待");
-                    $(document).reload();
+                    window.location.reload();
                 }
             },
             error: function () {
