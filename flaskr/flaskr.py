@@ -2,13 +2,13 @@
 from flask import Flask,request,render_template,url_for,session,escape,redirect,make_response
 import json
 import traceback
+import threading
+import os
 app=Flask(__name__, template_folder="")
 app.config.from_object('config')
 
-music_name_file = {}
-image_name_file = {}
-video_name_file ={}
-name_file_dict = {"music":music_name_file ,"image":image_name_file,"video":video_name_file}
+txt_name_file ={}
+name_file_dict = {"txt": txt_name_file}
 
 
 @app.route('/',methods=['GET'])
@@ -18,11 +18,11 @@ def welcome():
 
 @app.route('/List/',methods=['GET'])
 def get_list():
-
     print(request.args)
     getType = request.args['type']
-    content_list = name_file_dict[getType].keys()
+    content_list = list(name_file_dict[getType].keys())
     resp = {"successed":True, "List":content_list}
+    print(resp)
     resp = json.dumps(resp)
     return resp
 
@@ -35,11 +35,11 @@ def upload():
     if request.method=='POST':
         try:
             print(request.form)
-            print(equest.files["file"])
+            print(request.files["file"])
             f = request.files["file"]
             upType = request.form['type'].encode("gbk")  ###原文都是Unicode,在操作文件时会报错
             filename = request.form["filename"]
-        except(Exception, e):
+        except:
             failed_Res = traceback.format_exc()
             message = "表单数据解析异常" + failed_Res
             resp["message"] = message
@@ -48,57 +48,53 @@ def upload():
             return resp
 
         #检查有没有重名
+        pdf_filename = filename.encode("gbk")
+        store_path = "static/" + upType + "/" + pdf_filename
+        txt_filename = filename.replace(".pdf", ".txt")
         try:
-            flag = name_file_dict[upType][filename]
-            filename += u"a"
+            if not os.path.exists(store_path):
+                f.save("static/" + upType + "/" + pdf_filename)
+                name_file_dict["txt" if upType == "pdf" else upType][txt_filename] = True
+            with open("static/" + upType + "/" + txt_filename, "w") as res_file:
+                res_file.writelines(["--------- INFO: 解析请求提交中，长时间无变化请检查后台日志..."])
+            threading.Thread(target=runthread, args=([pdf_filename])).start()
         except:
-            name_file_dict[upType][filename] = True
-
-        filename = filename.encode("gbk")
-        try:
-            f_write = open("static/" + upType + "/" + upType + "Storage.txt", "a")
-            f_write.write(filename + "\n")
-            f_write.close()
-            f.save("static/" + upType + "/" + filename)
-        except(Exception, e):
             failed_Res = traceback.format_exc()
             message = "文件保存失败" + failed_Res
             resp["message"] = message
             resp["successed"] = False
             resp = json.dumps(resp)
             return resp
-
     resp = json.dumps(resp)
     return resp
 
-@app.route('/musicPage.html',methods=['GET'])
-def musicPage():
-    return render_template('musicPage.html')
+@app.route('/txtPage.html',methods=['GET'])
+def txtPage():
+    return render_template('txtPage.html')
 
-@app.route('/imagePage.html',methods=['GET'])
-def imagePage():
-    return render_template('imagePage.html')
-
-@app.route('/videoPage.html',methods=['GET'])
-def videoPage():
-    return render_template('videoPage.html')
-
-@app.route('/informationPage.html',methods=['GET'])
-def informationPage():
-    return render_template('informationPage.html')
-
+def runthread(pdfName):
+    '''
+    #fix_con.delete(taskid+"::result") #运行之前先清空上一次的结果
+    #fix_con.delete(taskid+"::classification") #运行之前先清空上一次的结果
+    '''
+    try:
+        os.system("(python -u pdfToTxt.py -f {}) > {}.out".format(pdfName, pdfName))
+    except:
+        print(u"--------- ERROR: 解析程序执行失败")
 
 def get_name_file(type, name_dict):
-    fr = open("static/" + type + "/" + type + "Storage.txt","r")
-    lines = fr.readlines()
-    for line in lines:
-        if len(line) == 0:
-            continue
-        print(line)
-        name_dict[line] = True
+    directory = os.path.join("static", type)
+    hasPrefix = lambda x: x.find("." + type) != -1
+    target = []  # 所有作业目标，是（目录，json文件名二元组）
+    print(u"--------- INFO:程序将遍历目录:{}，查找类型为{}的媒体".format(directory, type))
+    for dir, subdir, files in os.walk(directory):
+        withPreifx = set(list(filter(hasPrefix, files)))
+        for fileName in withPreifx:
+            fileName = os.path.join(fileName)
+            name_dict[fileName] = True
+    print(name_dict)
+
 print('当前已有文件：')
-get_name_file("music", music_name_file)
-get_name_file("image", image_name_file)
-get_name_file("video", video_name_file)
+get_name_file("txt", txt_name_file)
 if __name__ == '__main__':
-    app.run(host='127.0.0.1')
+    app.run(host='0.0.0.0', debug=True)

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF文本提取演示</title>
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <script language="JavaScript" src="static/js/jquery-3.2.0.min.js"></script>
+    <script language="JavaScript" src="static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!--文本提取演示页面，展示提取PDF文件得到的txt文件-->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">PDF文本抽取演示</h1>
+            </div>
+            <div class="panel-body">
+                <p class="panel-title">上传可解析的PDF文件，抽取其文本内容，生成对应的txt文件作为演示结果</p>
+            </div>
+        </div>
+	</div>
+
+	<div class="row">
+        <div class="col-sm-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">转化结果</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <h5 id="txtName" class="col-sm-5"></h5>
+                        <button type="button" class="btn btn-primary col-sm-offset-2" disabled id="download">下载</button>
+                    </div>
+                    <pre  id="txtProduction" src="" style="height: 450px; word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap; overflow-y:auto;">
+                        转化完成的文本将会出现在这里
+                        <p id="txtDisplay" onscroll="true"></p>
+                    </pre>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-4 ">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">已解析文件列表</h3>
+                </div>
+
+                <div class="panel-body">
+                    <div class="list-group" id="txtList">
+                            <a href="#" class="list-group-item"  src="">可上传</a>
+                    </div>
+
+                    <form>
+                        <div class="from-group">
+                            <label for="txtUploadFile">PDF文件上传</label>
+                            <input type="file" id="txtUploadFile"  accept="application/pdf">
+                            <p></p>
+                        </div>
+                        <button id="upload" type="button" class="btn btn-primary col-sm-offset-9">上传</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+</body>
+
+<script>
+
+    $(document).ready(function(){
+        //ajax请求已上传文件结果列表，（json)
+        $.ajax({
+            url:"http://127.0.0.1:5000/List/",
+            type:'GET',
+            data: 'type=txt',
+            datatype :'json', //
+            success: function(data){
+                obj = jQuery.parseJSON(data); //字符串转为json格式
+                if(obj.successed == false)
+                    alert(obj.message);
+                else{
+                    //收到列表消息，进行列表更新
+                    listArr = obj.List;
+                    for(var i = 0; i< listArr.length ; i++){
+                        var newTxt = document.createElement('a');
+                        newTxt.href = "#";
+                        newTxt.className = "list-group-item";
+                        newTxt.setAttribute("src", "./static/txt/" + listArr[i]);
+                        newTxt.innerText = listArr[i];
+                        //alert(listArr[i]);
+                        $("#txtList").prepend(newTxt);
+                    }
+
+                    //因为会动态改变列表，所以加在这里
+                    $("#txtList a").click(function () {
+                        //更换歌曲
+                        $("#txtProduction").attr("src", $(this).attr("src"));
+                        $("#txtProduction").load($(this).attr("src"));
+                        $("#txtName").text($(this).text());
+                        $("#txtList a.active").removeClass("active");
+                        $(this).addClass("active");
+                        $("#download").attr("disabled", false);
+                    });
+                }
+            }
+        })
+
+        //因为会动态改变列表，所以加在这里
+        $("#txtList a").click(function () {
+            //更换歌曲
+            $("#txtProduction").attr("src",$(this).attr("src"));
+            $("#txtName").text($(this).text());
+            $("#txtList a.active").removeClass("active");
+            $(this).addClass("active");
+            $("#download").attr("disabled", false);
+        });
+    });
+
+    $("#download").click(function(){
+       var link = document.createElement('a');
+       link.href = $("#txtProduction").attr("src");
+        alert("即将下载文件" + $("#txtList a.active").text() + "\n来源：" + link.href);
+        if(link.href.length == 0){
+            alert("未选择可下载的文件");
+            return;
+        }
+        link.download = $("#txtList a.active").text();
+        document.body.appendChild(link);
+        link.click();
+    });
+
+    $("#upload").click(function(){
+       var fileroute = $("#txtUploadFile").val().split("\\");
+       var filename = fileroute[fileroute.length - 1];
+
+        if(filename.length == 0){
+            alert("未选择可上传的文件");
+            return;
+        }
+        var fileData = new FormData();
+        fileData.append("fileroute",$("#txtUploadFile").val());
+        fileData.append("type","pdf");
+        fileData.append("file",$("#txtUploadFile").prop("files")[0]);
+        fileData.append("filename",filename);
+        alert("文件已上传，需要几分钟的处理时间，请耐心等待");
+        $.ajax({
+            url:"http://127.0.0.1:5000/upload/",
+            type:'POST',
+            /*data: 'type=txt'+
+                    '&&filename=' + $("#txtUploadFile").val()+*/
+
+            data :fileData, //
+            processData : false,
+            contentType : false,
+            success: function(data){
+                obj = jQuery.parseJSON(data); //字符串转为json格式
+                if(obj.successed == false)
+                    alert("upload Failed, reason:" + obj.message);
+                else{
+                    //上传成功
+
+                    var newTxt = document.createElement('a');
+                    newTxt.href = "#";
+                    newTxt.className = "list-group-item";
+                    newTxt.setAttribute("src", "./static/txt/" + filename);
+                    newTxt.innerText = filename;
+                    $("#txtList").prepend(newTxt);
+                    $("#txtList a").click(function () {
+                        //更换歌曲
+                        $("#txtProduction").attr("src",$(this).attr("src"));
+                        $("#txtName").text($(this).text());
+                        $("#txtList a.active").removeClass("active");
+                        $(this).addClass("active");
+
+                    });
+                    alert("upload success");
+                }
+            }
+        })
+    });
+
+</script>
+</html>
