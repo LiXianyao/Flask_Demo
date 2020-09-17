@@ -84,7 +84,7 @@ class PdfTablesExtractor:
         end_time_s = datetime.datetime.now()
         cost_time_s = (end_time_s - self.start_time_s).seconds
         print("--------- PDF-Transfer INFO：pdf表格解读完毕,总耗时{}处理{}页".format(cost_time_s, self.page_num))
-        print("--------- PDF-Transfer INFO：平均耗时{}页/秒".format(self.page_num / cost_time_s))
+        print("--------- PDF-Transfer INFO：平均耗时{}页/秒".format(self.page_num / cost_time_s + 1))
 
     def tablesdata2Set(self, tabula_res, table_range):  # 输入参数：tabula的解析结果，处理几个表
         page_tables = []

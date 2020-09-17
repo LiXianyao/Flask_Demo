@@ -39,7 +39,7 @@ def upload():
             print(request.files["file"])
             f = request.files["file"]
             upType = request.form['type']  ###原文都是Unicode,在操作文件时会报错
-            filename = "-".join(["".join(unit) for unit in pinyin(f.filename.replace(" ", ""))])
+            filename = "-".join(["".join(unit) for unit in pinyin(f.filename.replace(" ", ""))]).replace(".PDF", ".pdf")
         except:
             failed_Res = traceback.format_exc()
             message = "表单数据解析异常" + failed_Res
@@ -54,6 +54,7 @@ def upload():
         txt_filename = filename.replace(".pdf", ".txt")
         try:
             if not os.path.exists(store_path):
+                print(store_path)
                 f.save(store_path)
                 name_file_dict["txt"][txt_filename] = True
             with open("static/txt/" + txt_filename, "a", encoding="utf-8") as res_file:
